@@ -80,33 +80,43 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleVerifikasi = async () => {
-    if (!selectedPermohonan) return;
+ const handleVerifikasi = async (action: 'approve' | 'reject') => {
+  if (!selectedPermohonan) return
 
-    try {
-      const response = await fetch(`/api/admin/permohonan/${selectedPermohonan.id}/verifikasi`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          catatan: verifikasiData.catatan,
-          status: verifikasiData.action === 'approve' ? 'MENUNGGU_PERSETUJUAN' : 'DITOLAK'
-        }),
-      });
+  setVerifLoading(true)
+  try {
+    const response = await fetch(`/api/admin/permohonan/${selectedPermohonan.id}/verifikasi`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action,
+        catatan: catatan,
+      }),
+    })
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Verifikasi gagal');
-      }
-
-      toast.success(`Permohonan berhasil ${verifikasiData.action === 'approve' ? 'diverifikasi' : 'ditolak'}`);
-      setVerifikasiDialogOpen(false);
-      setVerifikasiData({ catatan: '', action: 'approve' });
-      fetchPermohonan();
-    } catch (err: any) {
-      toast.error(err.message || 'Verifikasi gagal');
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Gagal memproses verifikasi')
     }
-  };
+
+    const data = await response.json()
+
+    setDialogOpen(false)
+    setCatatan('')
+    setSelectedPermohonan(null)
+    fetchData()
+
+    // Show success message
+    alert(data.message || 'Verifikasi berhasil')
+  } catch (error: any) {
+    console.error('Error:', error)
+    alert(`Terjadi kesalahan: ${error.message}`)
+  } finally {
+    setVerifLoading(false)
+  }
+}
 
   const handleLogout = () => {
     localStorage.removeItem('token');
