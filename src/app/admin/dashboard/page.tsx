@@ -267,73 +267,82 @@ export default function AdminDashboard() {
                               </div>
                             </Badge>
                           </td>
-                          <td className="py-3 px-4 text-sm">{new Date(p.createdAt).toLocaleDateString('id-ID')}</td>
                           <td className="py-3 px-4">
-                            {p.status === 'MENUNGGU_VERIFIKASI' && (
-                              <Dialog open={verifikasiDialogOpen} onOpenChange={setVerifikasiDialogOpen}>
-                                <DialogTrigger asChild>
-                                  <Button
-                                    size="sm"
-                                    onClick={() => {
-                                      setSelectedPermohonan(p);
-                                      setVerifikasiData({ catatan: '', action: 'approve' });
-                                    }}
-                                  >
-                                    Verifikasi
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                  <DialogHeader>
-                                    <DialogTitle>Verifikasi Permohonan</DialogTitle>
-                                    <DialogDescription>
-                                      No. Registrasi: {selectedPermohonan?.nomorRegistrasi}
-                                    </DialogDescription>
-                                  </DialogHeader>
-                                  <div className="space-y-4 py-4">
-                                    <div>
-                                      <Label>Pilih Aksi</Label>
-                                      <div className="flex gap-2 mt-2">
-                                        <Button
-                                          type="button"
-                                          variant={verifikasiData.action === 'approve' ? 'default' : 'outline'}
-                                          onClick={() => setVerifikasiData({ ...verifikasiData, action: 'approve' })}
-                                        >
-                                          <CheckCircle className="mr-2 h-4 w-4" />
-                                          Teruskan ke Pimpinan
-                                        </Button>
-                                        <Button
-                                          type="button"
-                                          variant={verifikasiData.action === 'reject' ? 'destructive' : 'outline'}
-                                          onClick={() => setVerifikasiData({ ...verifikasiData, action: 'reject' })}
-                                        >
-                                          <XCircle className="mr-2 h-4 w-4" />
-                                          Tolak
-                                        </Button>
-                                      </div>
-                                    </div>
-                                    <div>
-                                      <Label htmlFor="catatan">Catatan (Opsional)</Label>
-                                      <Textarea
-                                        id="catatan"
-                                        value={verifikasiData.catatan}
-                                        onChange={(e) => setVerifikasiData({ ...verifikasiData, catatan: e.target.value })}
-                                        rows={3}
-                                        placeholder="Tambahkan catatan jika diperlukan..."
-                                      />
-                                    </div>
-                                  </div>
-                                  <div className="flex justify-end gap-2">
-                                    <Button variant="outline" onClick={() => setVerifikasiDialogOpen(false)}>
-                                      Batal
-                                    </Button>
-                                    <Button onClick={handleVerifikasi}>
-                                      {verifikasiData.action === 'approve' ? 'Verifikasi' : 'Tolak'}
-                                    </Button>
-                                  </div>
-                                </DialogContent>
-                              </Dialog>
-                            )}
-                          </td>
+  <div className="flex gap-2">
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={() => window.open(`/api/permohonan/${p.id}/document`, '_blank')}
+    >
+      <FileText className="mr-1 h-3 w-3" />
+      Dokumen
+    </Button>
+    {p.status === 'MENUNGGU_VERIFIKASI' && (
+      <Dialog open={verifikasiDialogOpen} onOpenChange={setVerifikasiDialogOpen}>
+        <DialogTrigger asChild>
+          <Button
+            size="sm"
+            onClick={() => {
+              setSelectedPermohonan(p);
+              setVerifikasiData({ catatan: '', action: 'approve' });
+            }}
+          >
+            Verifikasi
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Verifikasi Permohonan</DialogTitle>
+            <DialogDescription>
+              No. Registrasi: {selectedPermohonan?.nomorRegistrasi}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Pilih Aksi</Label>
+              <div className="flex gap-2 mt-2">
+                <Button
+                  type="button"
+                  variant={verifikasiData.action === 'approve' ? 'default' : 'outline'}
+                  onClick={() => setVerifikasiData({ ...verifikasiData, action: 'approve' })}
+                >
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Teruskan ke Pimpinan
+                </Button>
+                <Button
+                  type="button"
+                  variant={verifikasiData.action === 'reject' ? 'destructive' : 'outline'}
+                  onClick={() => setVerifikasiData({ ...verifikasiData, action: 'reject' })}
+                >
+                  <XCircle className="mr-2 h-4 w-4" />
+                  Tolak
+                </Button>
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="catatan">Catatan (Opsional)</Label>
+              <Textarea
+                id="catatan"
+                value={verifikasiData.catatan}
+                onChange={(e) => setVerifikasiData({ ...verifikasiData, catatan: e.target.value })}
+                rows={3}
+                placeholder="Tambahkan catatan jika diperlukan..."
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setVerifikasiDialogOpen(false)}>
+              Batal
+            </Button>
+            <Button onClick={handleVerifikasi}>
+              {verifikasiData.action === 'approve' ? 'Verifikasi' : 'Tolak'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    )}
+  </div>
+</td>
                         </tr>
                       ))}
                     </tbody>
