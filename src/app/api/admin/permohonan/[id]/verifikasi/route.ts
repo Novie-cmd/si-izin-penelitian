@@ -3,9 +3,10 @@ import { db } from '@/lib/db';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }  // ← params is now a Promise
 ) {
   try {
+    const { id } = await params;  // ← AWAIT params first
     const { action, catatan } = await request.json();
 
     if (!action || !['approve', 'reject'].includes(action)) {
@@ -16,7 +17,7 @@ export async function POST(
     }
 
     const permohonan = await db.permohonan.findUnique({
-      where: { id: params.id },
+      where: { id },  // ← Now id will be defined
     });
 
     if (!permohonan) {
@@ -45,19 +46,9 @@ export async function POST(
     }
 
     const updatedPermohonan = await db.permohonan.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
     });
-
-    // Log aktivitas - HAPUS bagian ini sementara
-    // await db.logAktivitas.create({
-    //   data: {
-    //     userId: permohonan.userId,
-    //     permohonanId: permohonan.id,
-    //     aktivitas: action === 'approve' ? 'VERIFIKASI_APPROVE' : 'VERIFIKASI_REJECT',
-    //     detail: `Admin ${action === 'approve' ? 'mengverifikasi dan mengirim ke pimpinan' : 'menolak'} permohonan ${permohonan.nomorRegistrasi}`,
-    //   },
-    // });
 
     return NextResponse.json({
       success: true,
