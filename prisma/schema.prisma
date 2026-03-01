@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+  PIMPINAN
+}
+
+enum Status {
+  MENUNGGU_VERIFIKASI
+  MENUNGGU_PERSETUJUAN
+  DISETUJUI
+  DITOLAK
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  nama      String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  permohonan Permohonan[]
+  logs       LogAktivitas[]
+}
+
+model Permohonan {
+  id                   String   @id @default(cuid())
+  nomorRegistrasi      String   @unique
+  namaPeneliti         String
+  institusi            String
+  judulPenelitian      String
+  tujuanPenelitian     String
+  lokasiPenelitian     String
+  tanggalMulai         DateTime
+  tanggalSelesai       DateTime
+  fileProposal         String?
+  status               Status   @default(MENUNGGU_VERIFIKASI)
+  catatanVerifikasi    String?
+  catatanPimpinan      String?
+  nomorSuratIzin       String?
+  tanggalPersetujuan   DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id])
+  logs                 LogAktivitas[]
+}
+
+model LogAktivitas {
+  id          String   @id @default(cuid())
+  aksi        String
+  detail      String?
+  createdAt   DateTime @default(now())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  permohonanId String?
+  permohonan  Permohonan? @relation(fields: [permohonanId], references: [id])
+}
