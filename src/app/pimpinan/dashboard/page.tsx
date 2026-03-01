@@ -85,34 +85,43 @@ export default function PimpinanDashboard() {
     }
   };
 
-  const handlePersetujuan = async () => {
-    if (!selectedPermohonan) return;
+ const handlePersetujuan = async (action: 'approve' | 'reject') => {
+  if (!selectedPermohonan) return
 
-    try {
-      const response = await fetch(`/api/pimpinan/permohonan/${selectedPermohonan.id}/persetujuan`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          catatan: persetujuanData.catatan,
-          status: persetujuanData.action === 'approve' ? 'DISETUJUI' : 'DITOLAK'
-        }),
-      });
+  setApproveLoading(true)
+  try {
+    const response = await fetch(`/api/pimpinan/permohonan/${selectedPermohonan.id}/persetujuan`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action,
+        catatan: catatan,
+      }),
+    })
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Persetujuan gagal');
-      }
-
-      toast.success(`Permohonan berhasil ${persetujuanData.action === 'approve' ? 'disetujui' : 'ditolak'}`);
-      setPersetujuanDialogOpen(false);
-      setPersetujuanData({ catatan: '', action: 'approve' });
-      fetchPermohonan();
-    } catch (err: any) {
-      toast.error(err.message || 'Persetujuan gagal');
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Gagal memproses persetujuan')
     }
-  };
 
+    const data = await response.json()
+
+    setDialogOpen(false)
+    setCatatan('')
+    setSelectedPermohonan(null)
+    fetchData()
+
+    // Show success message
+    alert(data.message || 'Persetujuan berhasil')
+  } catch (error: any) {
+    console.error('Error:', error)
+    alert(`Terjadi kesalahan: ${error.message}`)
+  } finally {
+    setApproveLoading(false)
+  }
+}
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
