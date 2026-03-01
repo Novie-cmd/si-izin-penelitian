@@ -1,0 +1,6 @@
+*.log
+db/
+node_modules/
+.env
+.dev.log
+.server.log
