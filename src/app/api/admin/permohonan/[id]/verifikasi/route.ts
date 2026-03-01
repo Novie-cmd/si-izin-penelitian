@@ -6,18 +6,17 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = params;
-    const { catatan, status } = await request.json();
+    const { action, catatan } = await request.json();
 
-    if (!status || (status !== 'MENUNGGU_PERSETUJUAN' && status !== 'DITOLAK')) {
+    if (!action || !['approve', 'reject'].includes(action)) {
       return NextResponse.json(
-        { error: 'Status tidak valid' },
+        { error: 'Action tidak valid' },
         { status: 400 }
       );
     }
 
     const permohonan = await db.permohonan.findUnique({
-      where: { id },
+      where: { id: params.id },
     });
 
     if (!permohonan) {
@@ -27,31 +26,48 @@ export async function POST(
       );
     }
 
+    if (permohonan.status !== 'MENUNGGU_VERIFIKASI') {
+      return NextResponse.json(
+        { error: 'Status permohonan tidak memungkinkan verifikasi' },
+        { status: 400 }
+      );
+    }
+
+    // Update status berdasarkan action
+    const updateData: any = {
+      catatanAdmin: catatan || null,
+    };
+
+    if (action === 'approve') {
+      updateData.status = 'MENUNGGU_PERSETUJUAN';
+    } else {
+      updateData.status = 'DITOLAK';
+    }
+
     const updatedPermohonan = await db.permohonan.update({
-      where: { id },
-      data: {
-        status,
-        catatanVerifikasi: catatan || null,
-      },
+      where: { id: params.id },
+      data: updateData,
     });
 
-    await db.logAktivitas.create({
-      data: {
-        aksi: status === 'MENUNGGU_PERSETUJUAN' ? 'VERIFIKASI_BERHASIL' : 'VERIFIKASI_DITOLAK',
-        detail: `Permohonan ${permohonan.nomorRegistrasi} ${status === 'MENUNGGU_PERSETUJUAN' ? 'diverifikasi dan diteruskan ke pimpinan' : 'ditolak oleh admin'}. Catatan: ${catatan || 'Tidak ada'}`,
-        userId: 'admin',
-        permohonanId: permohonan.id,
-      },
-    });
+    // Log aktivitas - HAPUS bagian ini sementara
+    // await db.logAktivitas.create({
+    //   data: {
+    //     userId: permohonan.userId,
+    //     permohonanId: permohonan.id,
+    //     aktivitas: action === 'approve' ? 'VERIFIKASI_APPROVE' : 'VERIFIKASI_REJECT',
+    //     detail: `Admin ${action === 'approve' ? 'mengverifikasi dan mengirim ke pimpinan' : 'menolak'} permohonan ${permohonan.nomorRegistrasi}`,
+    //   },
+    // });
 
     return NextResponse.json({
-      message: 'Permohonan berhasil diperbarui',
+      success: true,
+      message: `Permohonan berhasil ${action === 'approve' ? 'diverifikasi' : 'ditolak'}`,
       permohonan: updatedPermohonan,
     });
   } catch (error) {
-    console.error('Verifikasi permohonan error:', error);
+    console.error('Verifikasi error:', error);
     return NextResponse.json(
-      { error: 'Terjadi kesalahan saat memverifikasi permohonan' },
+      { error: 'Terjadi kesalahan server', details: String(error) },
       { status: 500 }
     );
   }
