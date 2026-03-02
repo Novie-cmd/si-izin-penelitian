@@ -51,7 +51,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  // plugins: [require("tailwindcss-animate")],  ← HAPUS baris ini
 };
 
 export default config;
