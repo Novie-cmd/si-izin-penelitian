@@ -34,26 +34,15 @@ export async function POST(
       )
     }
 
-    // Update status berdasarkan action
     const updateData: any = {
       catatanPimpinan: catatan || null,
     }
 
     if (action === 'approve') {
-      // Generate nomor surat
       const date = new Date()
       const year = date.getFullYear()
-      const count = await db.permohonan.count({
-        where: {
-          status: 'DISETUJUI',
-          createdAt: {
-            gte: new Date(year, 0, 1),
-            lt: new Date(year + 1, 0, 1),
-          },
-        },
-      })
-      const nomorSurat = `050/${count + 1}/BAKESBANG/${year}`
-
+      const nomorSurat = `050/${Math.floor(Math.random() * 900) + 100}/BAKESBANG/${year}`
+      
       updateData.status = 'DISETUJUI'
       updateData.nomorSurat = nomorSurat
       updateData.tanggalApprove = date
@@ -64,16 +53,6 @@ export async function POST(
     const updatedPermohonan = await db.permohonan.update({
       where: { id },
       data: updateData,
-    })
-
-    // Log aktivitas
-    await db.logAktivitas.create({
-      data: {
-        userId: permohonan.userId,
-        permohonanId: permohonan.id,
-        aktivitas: action === 'approve' ? 'PERSETUJUAN_APPROVE' : 'PERSETUJUAN_REJECT',
-        detail: `Pimpinan ${action === 'approve' ? 'menyetujui' : 'menolak'} permohonan ${permohonan.nomorRegistrasi}`,
-      },
     })
 
     return NextResponse.json({
