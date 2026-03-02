@@ -1,9 +1,43 @@
-/** @type {import('postcss-load-config').Config} */
-const config = {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
+{
+  "name": "si-izin-penelitian",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:push": "prisma db push"
   },
-};
-
-export default config;
+  "dependencies": {
+    "@prisma/client": "^6.0.1",
+    "@radix-ui/react-dialog": "^1.1.2",
+    "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-toast": "^1.2.2",
+    "@tailwindcss/postcss": "^4.0.0",
+    "bcryptjs": "^2.4.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "jspdf": "^2.5.2",
+    "lucide-react": "^0.468.0",
+    "next": "16.1.3",
+    "qrcode": "^1.5.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sonner": "^1.5.0",
+    "tailwind-merge": "^2.5.5",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.10.1",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
+    "prisma": "^6.0.1",
+    "tailwindcss": "^4.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
